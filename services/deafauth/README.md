@@ -8,6 +8,10 @@ DeafAUTH is the foundational identity and authentication layer that provides sec
 
 ## API Endpoints
 
+**Base URL:** `https://api.mbtquniverse.com/auth`
+
+**Note:** The endpoints below show full paths for clarity. In the OpenAPI specification, these are defined as relative paths (e.g., `/register`) with the base URL specified in the `servers` section.
+
 ### Authentication
 
 - `POST /auth/register` - User registration

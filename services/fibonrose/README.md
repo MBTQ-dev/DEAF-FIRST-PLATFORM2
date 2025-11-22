@@ -8,6 +8,10 @@ Fibonrose provides blockchain-based trust, verification, and decentralized ident
 
 ## API Endpoints
 
+**Base URL:** `https://api.mbtquniverse.com/blockchain`
+
+**Note:** The endpoints below show full paths for clarity. In the OpenAPI specification, these are defined as relative paths (e.g., `/verify`) with the base URL specified in the `servers` section.
+
 ### Blockchain Operations
 
 - `POST /blockchain/verify` - Verify blockchain transaction

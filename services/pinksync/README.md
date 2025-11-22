@@ -8,6 +8,10 @@ PinkSync is the accessibility engine that provides real-time synchronization of 
 
 ## API Endpoints
 
+**Base URL:** `https://api.mbtquniverse.com/sync`
+
+**Note:** The endpoints below show full paths for clarity. In the OpenAPI specification, these are defined as relative paths (e.g., `/status`) with the base URL specified in the `servers` section.
+
 ### Synchronization
 
 - `GET /sync/status` - Check synchronization status

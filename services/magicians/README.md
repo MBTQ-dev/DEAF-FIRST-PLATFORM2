@@ -8,6 +8,10 @@ Intelligent automation and assistance agents for the MBTQ Universe.
 
 ## API Endpoints
 
+**Base URL:** `https://api.mbtquniverse.com/ai`
+
+**Note:** The endpoints below show full paths for clarity. In the OpenAPI specification, these are defined as relative paths with the base URL specified in the `servers` section. Path parameters use `{paramName}` syntax in the OpenAPI spec but are shown as `:paramName` here for readability.
+
 ### Agents
 
 - `POST /ai/agents` - Create agent

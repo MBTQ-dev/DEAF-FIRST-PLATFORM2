@@ -88,6 +88,8 @@ curl -X GET https://api.mbtquniverse.com/sync/status \
 
 ## 📦 API Endpoints Overview
 
+**Note:** The endpoints below show full paths including the service prefix (e.g., `/auth/`, `/sync/`). In the OpenAPI specifications, these are defined as relative paths (e.g., `/register`, `/status`) with the base URL specified in the `servers` section.
+
 ### DeafAUTH Endpoints
 
 - `POST /auth/register` - User registration
