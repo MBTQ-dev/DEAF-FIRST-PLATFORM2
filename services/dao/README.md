@@ -8,7 +8,7 @@ The MBTQ DAO provides decentralized governance for the MBTQ Universe platform, e
 
 ## API Endpoints
 
-**Base URL:** `https://api.mbtq.devu
+**Base URL:** `https://api.mbtq.dev
 
 **Note:** The endpoints below show full paths for clarity. In the OpenAPI specification, these are defined as relative paths (e.g., `/proposals`) with the base URL specified in the `servers` section.
 
