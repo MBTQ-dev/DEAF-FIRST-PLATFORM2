@@ -53,7 +53,8 @@ Decentralized governance and community management.
 ✔ Shared DeafAUTH security scheme  
 ✔ Tags, components, pagination, error schemas  
 ✔ Cloudflare-friendly JSON-only style  
-✔ Ready for SDK generation (TypeScript + Python)  
+✔ **Automated API testing with Jest**  
+✔ **SDK generation (TypeScript + Python)**  
 ✔ Production-ready specifications  
 
 ## 🔐 Authentication
@@ -169,24 +170,62 @@ This platform integrates with several related repositories:
 - [pinkycollie/fibonrose](https://github.com/pinkycollie/fibonrose) - Blockchain trust layer
 - [pinkycollie/pinkflow](https://github.com/pinkycollie/pinkflow) - Hub pipeline integrator
 
-## 🧪 Validation
+## 🧪 Testing & Validation
 
-All OpenAPI specifications are validated and ready for:
+### Automated API Testing
+
+Run comprehensive API tests for all services:
+
+```bash
+# Install dependencies
+npm install
+
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run specific service tests
+npm test -- tests/deafauth
+npm test -- tests/pinksync
+npm test -- tests/magicians
+```
+
+See [tests/README.md](tests/README.md) for detailed testing documentation.
+
+### OpenAPI Validation
+
+Validate all OpenAPI specifications:
+
+```bash
+# Validate specs
+npm run validate:openapi
+```
+
+All specifications are validated and ready for:
 
 - Documentation generation
 - SDK generation (TypeScript, Python, Go, etc.)
 - API gateway configuration
 - Testing and mocking
 
-To validate a specification:
+### SDK Generation
+
+Generate client SDKs from OpenAPI specifications:
 
 ```bash
-# Using openapi-generator-cli
-openapi-generator-cli validate -i services/deafauth/openapi/openapi.yaml
+# Generate TypeScript SDK
+npm run generate:sdk:typescript
 
-# Using swagger-cli
-swagger-cli validate services/deafauth/openapi/openapi.yaml
+# Generate Python SDK
+npm run generate:sdk:python
+
+# Generate all SDKs
+npm run generate:sdk
 ```
+
+Generated SDKs will be in the `sdks/` directory. See [SDK.md](SDK.md) for detailed documentation and usage examples.
 
 ## 📚 Middleware Examples
 
@@ -229,11 +268,54 @@ const pinkSyncMiddleware = async (req, res, next) => {
 module.exports = pinkSyncMiddleware;
 ```
 
+## 🎯 Quick Start for Developers
+
+### 1. Clone and Install
+
+```bash
+# Clone the repository
+git clone https://github.com/pinkycollie/DEAF-FIRST-PLATFORM.git
+cd DEAF-FIRST-PLATFORM
+
+# Install dependencies
+npm install
+```
+
+### 2. Validate OpenAPI Specifications
+
+```bash
+npm run validate:openapi
+```
+
+### 3. Run Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+```
+
+### 4. Generate SDKs
+
+```bash
+# Generate TypeScript SDK
+npm run generate:sdk:typescript
+
+# Generate Python SDK
+npm run generate:sdk:python
+```
+
+### 5. Use Generated SDKs
+
+See [SDK.md](SDK.md) for usage examples with TypeScript and Python.
+
 ## 🎯 Next Steps
 
-### Option 1: Generate SDKs
+### Generate Documentation
 
-Generate TypeScript and Python SDKs from OpenAPI specs:
+Generate interactive API documentation:
 
 ```bash
 # TypeScript SDK
