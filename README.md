@@ -55,7 +55,27 @@ Decentralized governance and community management.
 ✔ Cloudflare-friendly JSON-only style  
 ✔ **Automated API testing with Jest**  
 ✔ **SDK generation (TypeScript + Python)**  
+✔ **Interactive HTML documentation**  
+✔ **Fetch API examples for browsers**  
+✔ **Architecture documentation**  
 ✔ Production-ready specifications  
+
+## 📖 Documentation
+
+### Quick Links
+
+- **[Architecture Documentation](docs/ARCHITECTURE.md)** - System architecture, service relationships, and data flows
+- **[Fetch API Examples](docs/FETCH-API-EXAMPLES.md)** - Browser-compatible API examples
+- **[SDK Guide](SDK.md)** - TypeScript & Python SDK generation
+- **[Interactive HTML Docs](docs/html/index.html)** - Interactive API documentation (run `npm run docs:serve` to view)
+- **[Quick Start Guide](QUICKSTART.md)** - Get up and running quickly
+
+### Generate HTML Documentation
+
+```bash
+npm run generate:docs     # Generate interactive HTML docs
+npm run docs:serve        # Serve docs at http://localhost:3000
+```
 
 ## 🔐 Authentication
 
