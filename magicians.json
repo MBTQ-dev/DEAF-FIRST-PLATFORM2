@@ -919,8 +919,7 @@
       
       "agent_communication": {
         "message_bus": "Redis Pub/Sub or RabbitMQ",
-        "protocols": {
-          "​​​​​​​​​​​​​​​​
+        "protocols": ["AMQP", "MQTT", "WebSocket"],
     "message_format": {
       "sender_id": "agent_001",
       "receiver_id": "agent_002",
