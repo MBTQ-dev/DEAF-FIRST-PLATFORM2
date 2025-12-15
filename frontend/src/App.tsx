@@ -165,8 +165,8 @@ function App() {
                     className="architecture-node"
                     style={{
                       borderColor: node.color,
-                      '--node-color': node.color,
-                    } as React.CSSProperties}
+                      ['--node-color' as any]: node.color,
+                    }}
                   >
                     <div className="node-name">{node.name}</div>
                     <div className="node-tech">{node.tech}</div>

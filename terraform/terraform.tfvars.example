@@ -7,6 +7,7 @@ project_name = "deaf-first"
 
 # Network Configuration
 vpc_cidr           = "10.0.0.0/16"
+# Specify availability zones for your region
 availability_zones = ["us-east-1a", "us-east-1b"]
 
 # Database Configuration

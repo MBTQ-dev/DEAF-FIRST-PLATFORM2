@@ -26,9 +26,14 @@ variable "vpc_cidr" {
 }
 
 variable "availability_zones" {
-  description = "List of availability zones"
+  description = "List of availability zones. Must be valid for the specified region."
   type        = list(string)
-  default     = ["us-east-1a", "us-east-1b"]
+  default     = []
+  
+  validation {
+    condition     = length(var.availability_zones) > 0
+    error_message = "At least one availability zone must be specified."
+  }
 }
 
 variable "postgres_instance_class" {

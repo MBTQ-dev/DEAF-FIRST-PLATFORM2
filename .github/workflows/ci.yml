@@ -124,7 +124,7 @@ jobs:
       - name: Test Docker Compose
         run: |
           if [ -f "configs/deployment/docker-compose.yml" ]; then
-            docker-compose -f configs/deployment/docker-compose.yml config
+            docker compose -f configs/deployment/docker-compose.yml config
           else
             echo "Docker Compose file not found, skipping"
           fi
