@@ -123,19 +123,6 @@ resource "google_compute_security_policy" "security_policy" {
   name    = "${var.project_name}-${var.environment}-security-policy"
   project = var.project_id
 
-  # Rule to block known bad IPs
-  rule {
-    action   = "deny(403)"
-    priority = "1000"
-    match {
-      versioned_expr = "SRC_IPS_V1"
-      config {
-        src_ip_ranges = ["0.0.0.0/0"] # Replace with actual bad IP list
-      }
-    }
-    description = "Block known bad IPs"
-  }
-
   # Rate limiting rule
   rule {
     action   = "rate_based_ban"
