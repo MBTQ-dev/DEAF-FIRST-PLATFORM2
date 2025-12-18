@@ -55,7 +55,7 @@ resource "google_storage_bucket" "auth_functions_bucket" {
   project  = var.project_id
 
   uniform_bucket_level_access = true
-  
+
   versioning {
     enabled = true
   }
@@ -121,9 +121,9 @@ resource "google_cloudfunctions2_function" "user_registration" {
     service_account_email = google_service_account.deafauth_sa.email
 
     environment_variables = {
-      ENVIRONMENT     = var.environment
-      FIRESTORE_DB    = google_firestore_database.deafauth_database.name
-      PROJECT_ID      = var.project_id
+      ENVIRONMENT  = var.environment
+      FIRESTORE_DB = google_firestore_database.deafauth_database.name
+      PROJECT_ID   = var.project_id
     }
   }
 }
@@ -153,9 +153,9 @@ resource "google_cloudfunctions2_function" "user_authentication" {
     service_account_email = google_service_account.deafauth_sa.email
 
     environment_variables = {
-      ENVIRONMENT     = var.environment
-      FIRESTORE_DB    = google_firestore_database.deafauth_database.name
-      PROJECT_ID      = var.project_id
+      ENVIRONMENT  = var.environment
+      FIRESTORE_DB = google_firestore_database.deafauth_database.name
+      PROJECT_ID   = var.project_id
     }
   }
 }
@@ -185,9 +185,9 @@ resource "google_cloudfunctions2_function" "profile_management" {
     service_account_email = google_service_account.deafauth_sa.email
 
     environment_variables = {
-      ENVIRONMENT     = var.environment
-      FIRESTORE_DB    = google_firestore_database.deafauth_database.name
-      PROJECT_ID      = var.project_id
+      ENVIRONMENT  = var.environment
+      FIRESTORE_DB = google_firestore_database.deafauth_database.name
+      PROJECT_ID   = var.project_id
     }
   }
 }

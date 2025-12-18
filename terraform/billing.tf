@@ -8,7 +8,7 @@ resource "google_billing_budget" "project_budget" {
 
   budget_filter {
     projects = ["projects/${var.project_id}"]
-    
+
     # Filter by labels if needed
     labels = {
       environment = var.environment
@@ -37,7 +37,7 @@ resource "google_billing_budget" "project_budget" {
       for email in var.notification_emails :
       google_monitoring_notification_channel.budget_alerts[email].id
     ]
-    
+
     disable_default_iam_recipients = false
   }
 }
@@ -64,7 +64,7 @@ resource "google_billing_budget" "service_budgets" {
 
   budget_filter {
     projects = ["projects/${var.project_id}"]
-    
+
     labels = {
       service = each.key
     }
@@ -91,7 +91,7 @@ resource "google_billing_budget" "service_budgets" {
     monitoring_notification_channels = [
       google_monitoring_notification_channel.budget_alerts[var.notification_emails[0]].id
     ]
-    
+
     disable_default_iam_recipients = false
   }
 }
@@ -110,7 +110,7 @@ resource "google_logging_project_sink" "billing_logs" {
   EOT
 
   unique_writer_identity = true
-  
+
   bigquery_options {
     use_partitioned_tables = true
   }
@@ -158,7 +158,7 @@ resource "google_monitoring_alert_policy" "cost_anomaly" {
 
   conditions {
     display_name = "Unusual cost increase detected"
-    
+
     condition_threshold {
       filter          = "metric.type=\"serviceruntime.googleapis.com/api/request_count\" resource.type=\"consumed_api\""
       duration        = "3600s"
@@ -208,10 +208,10 @@ resource "google_bigquery_data_transfer_config" "cost_analysis" {
       GROUP BY usage_date, service_name, usage_unit
       ORDER BY usage_date DESC, total_cost DESC
     SQL
-    
+
     destination_table_name_template = "cost_analysis_{run_date}"
-    write_disposition              = "WRITE_TRUNCATE"
-    partitioning_field             = ""
+    write_disposition               = "WRITE_TRUNCATE"
+    partitioning_field              = ""
   }
 }
 

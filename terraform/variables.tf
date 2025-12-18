@@ -62,7 +62,7 @@ variable "database_tier" {
   description = "Cloud SQL instance tier"
   type        = string
   default     = "db-f1-micro"
-  
+
   validation {
     condition     = contains(["db-f1-micro", "db-g1-small", "db-n1-standard-1", "db-n1-standard-2"], var.database_tier)
     error_message = "Database tier must be a valid Cloud SQL tier."

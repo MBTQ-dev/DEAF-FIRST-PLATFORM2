@@ -28,7 +28,7 @@ resource "google_sql_database_instance" "fibonrose_postgres" {
 
     ip_configuration {
       ipv4_enabled    = false
-      private_network = var.vpc_id
+      private_network = google_compute_network.main_vpc.id
       require_ssl     = true
     }
 
@@ -270,25 +270,31 @@ resource "google_project_iam_member" "fibonrose_logging" {
 }
 
 # Vertex AI Workbench Instance for model development
-resource "google_notebooks_instance" "model_development" {
+resource "google_workbench_instance" "model_development" {
   name     = "${var.project_name}-${var.environment}-model-dev"
   location = "${var.region}-b"
   project  = var.project_id
 
-  machine_type = "n1-standard-4"
+  gce_setup {
+    machine_type = "n1-standard-4"
 
-  vm_image {
-    project      = "deeplearning-platform-release"
-    image_family = "common-cpu"
-  }
+    vm_image {
+      project = "deeplearning-platform-release"
+      family  = "common-cpu"
+    }
 
-  network = var.vpc_id
-  subnet  = var.subnet_id
+    network_interfaces {
+      network = google_compute_network.main_vpc.id
+      subnet  = google_compute_subnetwork.private_subnet.id
+    }
 
-  service_account = google_service_account.fibonrose_sa.email
+    service_accounts {
+      email = google_service_account.fibonrose_sa.email
+    }
 
-  metadata = {
-    terraform = "true"
+    metadata = {
+      terraform = "true"
+    }
   }
 }
 
@@ -312,7 +318,7 @@ resource "google_storage_bucket" "model_artifacts" {
   project  = var.project_id
 
   uniform_bucket_level_access = true
-  
+
   versioning {
     enabled = true
   }

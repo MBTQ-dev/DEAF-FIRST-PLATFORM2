@@ -9,14 +9,14 @@ project_name = "deaf-first"
 organization_email = "architect@360magician.com"
 
 # Networking Configuration
-vpc_cidr             = "10.0.0.0/16"
-public_subnet_cidr   = "10.0.1.0/24"
-private_subnet_cidr  = "10.0.2.0/24"
+vpc_cidr            = "10.0.0.0/16"
+public_subnet_cidr  = "10.0.1.0/24"
+private_subnet_cidr = "10.0.2.0/24"
 
 # Database Configuration - Minimal for dev
-database_tier          = "db-f1-micro"
-enable_backups         = false
-backup_retention_days  = 1
+database_tier         = "db-f1-micro"
+enable_backups        = false
+backup_retention_days = 1
 
 # Storage Configuration
 enable_storage_versioning = false

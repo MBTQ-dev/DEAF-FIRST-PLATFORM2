@@ -53,7 +53,7 @@ resource "google_compute_router_nat" "nat" {
   name                               = "${var.project_name}-${var.environment}-nat"
   router                             = google_compute_router.router.name
   region                             = var.region
-  nat_ip_allocate_option            = "AUTO_ONLY"
+  nat_ip_allocate_option             = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
   project                            = var.project_id
 
@@ -150,12 +150,12 @@ resource "google_compute_security_policy" "security_policy" {
       conform_action = "allow"
       exceed_action  = "deny(429)"
       enforce_on_key = "IP"
-      
+
       rate_limit_threshold {
         count        = 1000
         interval_sec = 60
       }
-      
+
       ban_duration_sec = 600
     }
     description = "Rate limit to 1000 requests per minute"

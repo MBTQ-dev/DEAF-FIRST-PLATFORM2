@@ -46,7 +46,7 @@ resource "google_pubsub_subscription" "user_updates_sub" {
 
   push_config {
     push_endpoint = google_cloud_run_v2_service.pinksync_processor.uri
-    
+
     oidc_token {
       service_account_email = google_service_account.pinksync_sa.email
     }
@@ -67,7 +67,7 @@ resource "google_pubsub_subscription" "document_changes_sub" {
 
   push_config {
     push_endpoint = "${google_cloud_run_v2_service.pinksync_processor.uri}/document-changes"
-    
+
     oidc_token {
       service_account_email = google_service_account.pinksync_sa.email
     }
@@ -175,8 +175,8 @@ resource "google_cloud_run_v2_service" "pinksync_processor" {
 
     vpc_access {
       network_interfaces {
-        network    = var.vpc_id
-        subnetwork = var.vpc_id
+        network    = google_compute_network.main_vpc.id
+        subnetwork = google_compute_subnetwork.private_subnet.id
       }
     }
   }

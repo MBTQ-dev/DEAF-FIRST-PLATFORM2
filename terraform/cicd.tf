@@ -12,7 +12,7 @@ resource "google_artifact_registry_repository" "docker_repo" {
   cleanup_policies {
     id     = "keep-minimum-versions"
     action = "KEEP"
-    
+
     most_recent_versions {
       keep_count = 10
     }
@@ -21,7 +21,7 @@ resource "google_artifact_registry_repository" "docker_repo" {
   cleanup_policies {
     id     = "delete-old-versions"
     action = "DELETE"
-    
+
     condition {
       older_than = "2592000s" # 30 days
     }
@@ -81,7 +81,7 @@ resource "google_cloudbuild_trigger" "deafauth_build" {
   github {
     owner = "pinkycollie"
     name  = "DEAF-FIRST-PLATFORM"
-    
+
     push {
       branch = var.environment == "production" ? "^main$" : "^${var.environment}$"
     }
@@ -132,7 +132,7 @@ resource "google_cloudbuild_trigger" "pinksync_build" {
   github {
     owner = "pinkycollie"
     name  = "DEAF-FIRST-PLATFORM"
-    
+
     push {
       branch = var.environment == "production" ? "^main$" : "^${var.environment}$"
     }
@@ -184,7 +184,7 @@ resource "google_cloudbuild_trigger" "fibonrose_build" {
   github {
     owner = "pinkycollie"
     name  = "DEAF-FIRST-PLATFORM"
-    
+
     push {
       branch = var.environment == "production" ? "^main$" : "^${var.environment}$"
     }
@@ -225,7 +225,7 @@ resource "google_cloudbuild_trigger" "test_trigger" {
   github {
     owner = "pinkycollie"
     name  = "DEAF-FIRST-PLATFORM"
-    
+
     pull_request {
       branch = ".*"
     }
@@ -289,7 +289,7 @@ resource "google_storage_bucket" "build_artifacts" {
   project  = var.project_id
 
   uniform_bucket_level_access = true
-  
+
   lifecycle_rule {
     condition {
       age = 30

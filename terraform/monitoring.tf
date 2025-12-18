@@ -25,7 +25,7 @@ resource "google_storage_bucket" "logs_bucket" {
   project  = var.project_id
 
   uniform_bucket_level_access = true
-  
+
   lifecycle_rule {
     condition {
       age = 30
@@ -232,7 +232,7 @@ resource "google_monitoring_alert_policy" "high_error_rate" {
 
   conditions {
     display_name = "Error rate is above threshold"
-    
+
     condition_threshold {
       filter          = "metric.type=\"logging.googleapis.com/user/${google_logging_metric.error_rate.name}\" resource.type=\"cloud_run_revision\""
       duration        = "60s"
@@ -261,7 +261,7 @@ resource "google_monitoring_alert_policy" "high_latency" {
 
   conditions {
     display_name = "Request latency is above threshold"
-    
+
     condition_threshold {
       filter          = "metric.type=\"run.googleapis.com/request_latencies\" resource.type=\"cloud_run_revision\""
       duration        = "300s"
@@ -292,7 +292,7 @@ resource "google_monitoring_alert_policy" "database_cpu_high" {
 
   conditions {
     display_name = "Database CPU utilization is high"
-    
+
     condition_threshold {
       filter          = "metric.type=\"cloudsql.googleapis.com/database/cpu/utilization\" resource.type=\"cloudsql_database\""
       duration        = "300s"
@@ -321,7 +321,7 @@ resource "google_monitoring_alert_policy" "cloud_run_scaling" {
 
   conditions {
     display_name = "Cloud Run instance count is high"
-    
+
     condition_threshold {
       filter          = "metric.type=\"run.googleapis.com/container/instance_count\" resource.type=\"cloud_run_revision\""
       duration        = "180s"
