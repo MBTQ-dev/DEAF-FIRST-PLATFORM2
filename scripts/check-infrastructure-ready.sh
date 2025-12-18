@@ -101,7 +101,7 @@ check_service_configs() {
 check_documentation() {
     echo "Checking infrastructure documentation..."
     
-    local docs=("README.md" "infrastructure.md" "${TERRAFORM_DIR}/README.md")
+    local docs=("README.md" "INFRASTRUCTURE-COMPLETION.md" "${TERRAFORM_DIR}/README.md")
     for doc in "${docs[@]}"; do
         if [ -f "${doc}" ]; then
             echo -e "${GREEN}✓ Documentation file ${doc} exists${NC}"
