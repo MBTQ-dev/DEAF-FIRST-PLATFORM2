@@ -11,6 +11,10 @@ variable "project_name" {
   description = "Project name for resource naming"
   type        = string
   default     = "deaf-first"
+# Core Variables
+variable "project_id" {
+  description = "GCP Project ID"
+  type        = string
 }
 
 variable "environment" {
@@ -26,6 +30,15 @@ variable "region" {
   description = "GCP region for resources"
   type        = string
   default     = "us-central1"
+  description = "GCP region"
+  type        = string
+  default     = "us-central1"
+}
+
+variable "zone" {
+  description = "GCP zone"
+  type        = string
+  default     = "us-central1-a"
 }
 
 variable "zones" {
@@ -48,6 +61,14 @@ variable "architect_email" {
 # Networking Variables
 # ============================================
 
+# Organization Variables
+variable "organization_email" {
+  description = "Organization email for IAM attribution"
+  type        = string
+  default     = "architect@360magician.com"
+}
+
+# Networking Variables
 variable "vpc_cidr" {
   description = "CIDR block for VPC"
   type        = string
@@ -86,6 +107,32 @@ variable "postgres_disk_size" {
 
 variable "postgres_backup_enabled" {
   description = "Enable automated backups for PostgreSQL"
+variable "public_subnet_cidr" {
+  description = "CIDR block for public subnet"
+  type        = string
+  default     = "10.0.1.0/24"
+}
+
+variable "private_subnet_cidr" {
+  description = "CIDR block for private subnet"
+  type        = string
+  default     = "10.0.2.0/24"
+}
+
+# Database Variables
+variable "database_tier" {
+  description = "Cloud SQL instance tier"
+  type        = string
+  default     = "db-f1-micro"
+
+  validation {
+    condition     = contains(["db-f1-micro", "db-g1-small", "db-n1-standard-1", "db-n1-standard-2"], var.database_tier)
+    error_message = "Database tier must be a valid Cloud SQL tier."
+  }
+}
+
+variable "enable_backups" {
+  description = "Enable automated database backups"
   type        = bool
   default     = true
 }
@@ -157,12 +204,15 @@ variable "storage_location" {
 }
 
 variable "storage_versioning_enabled" {
+# Storage Variables
+variable "enable_storage_versioning" {
   description = "Enable versioning for storage buckets"
   type        = bool
   default     = true
 }
 
 variable "storage_lifecycle_age_days" {
+variable "storage_lifecycle_days" {
   description = "Days before transitioning to cheaper storage class"
   type        = number
   default     = 90
@@ -196,6 +246,20 @@ variable "budget_amount" {
 
 variable "budget_alert_threshold" {
   description = "Budget alert threshold percentages"
+# Billing Variables
+variable "billing_account" {
+  description = "GCP billing account ID"
+  type        = string
+}
+
+variable "budget_amount" {
+  description = "Monthly budget amount in USD"
+  type        = number
+  default     = 1000
+}
+
+variable "alert_threshold" {
+  description = "Budget alert thresholds (percentages)"
   type        = list(number)
   default     = [0.5, 0.75, 0.9, 1.0]
 }
@@ -234,6 +298,35 @@ variable "deaf_web_assets_bucket" {
 
 variable "vertex_ai_region" {
   description = "Region for Vertex AI model deployment"
+variable "notification_emails" {
+  description = "Email addresses for budget alerts"
+  type        = list(string)
+  default     = ["architect@360magician.com"]
+}
+
+# Cloud Run Variables
+variable "cloud_run_min_instances" {
+  description = "Minimum number of Cloud Run instances"
+  type        = number
+  default     = 0
+}
+
+variable "cloud_run_max_instances" {
+  description = "Maximum number of Cloud Run instances"
+  type        = number
+  default     = 10
+}
+
+# Firestore Variables
+variable "firestore_location" {
+  description = "Firestore database location"
+  type        = string
+  default     = "us-central"
+}
+
+# Vertex AI Variables
+variable "vertex_ai_region" {
+  description = "Vertex AI region"
   type        = string
   default     = "us-central1"
 }
@@ -278,4 +371,9 @@ variable "kms_key_rotation_period" {
   description = "KMS key rotation period in seconds"
   type        = string
   default     = "7776000s" # 90 days
+# BigQuery Variables
+variable "bigquery_dataset_location" {
+  description = "BigQuery dataset location"
+  type        = string
+  default     = "US"
 }
