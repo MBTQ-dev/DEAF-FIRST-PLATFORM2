@@ -771,7 +771,10 @@ variable "budget_alert_threshold" {
 variable "billing_account_id" {
   description = "GCP Billing Account ID"
   type        = string
-  default     = ""
+  validation {
+    condition     = length(trim(var.billing_account_id)) > 0
+    error_message = "billing_account_id must be provided and cannot be an empty string."
+  }
 
   notification_channels = [google_monitoring_notification_channel.email.id]
 
