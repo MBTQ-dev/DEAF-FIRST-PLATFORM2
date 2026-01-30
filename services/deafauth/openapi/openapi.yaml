@@ -2,10 +2,10 @@ openapi: 3.1.0
 info:
   title: DeafAUTH - Identity Cortex
   version: 1.0.0
-  description: Deaf-first authentication and identity layer for MBTQ Universe.
+  description: Deaf-first authentication and identity layer=.
 
 servers:
-  - url: https://api.mbtquniverse.com/auth
+  - url: https://api.mbtq.dev/auth
 
 security:
   - DeafAuthToken: []
