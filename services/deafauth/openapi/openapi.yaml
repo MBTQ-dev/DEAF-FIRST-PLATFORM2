@@ -5,7 +5,7 @@ info:
   description: Deaf-first authentication and identity layer=.
 
 servers:
-  - url: https://api.mbtq.dev/auth
+  - url: https://api.mbtquniverse.com/auth
 
 security:
   - DeafAuthToken: []
