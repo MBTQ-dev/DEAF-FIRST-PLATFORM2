@@ -90,7 +90,7 @@ router.get('/', (req: Request, res: Response) => {
  */
 router.get('/:id/deliveries', (req: Request, res: Response) => {
   try {
-    const deliveries = webhookService.getDeliveries(req.params.id);
+    const deliveries = webhookService.getDeliveries(req.params.id as string);
 
     res.json({
       success: true,
@@ -112,7 +112,7 @@ router.get('/:id/deliveries', (req: Request, res: Response) => {
  */
 router.get('/:id', (req: Request, res: Response) => {
   try {
-    const webhook = webhookService.getWebhook(req.params.id);
+    const webhook = webhookService.getWebhook(req.params.id as string);
     
     if (!webhook) {
       return res.status(404).json({
@@ -192,7 +192,7 @@ router.put('/:id', (req: Request, res: Response) => {
     if (events !== undefined) updates.events = events;
     if (active !== undefined) updates.active = active;
 
-    const webhook = webhookService.updateWebhook(req.params.id, updates);
+    const webhook = webhookService.updateWebhook(req.params.id as string, updates);
 
     if (!webhook) {
       return res.status(404).json({
@@ -224,7 +224,7 @@ router.put('/:id', (req: Request, res: Response) => {
  */
 router.delete('/:id', (req: Request, res: Response) => {
   try {
-    const deleted = webhookService.deleteWebhook(req.params.id);
+    const deleted = webhookService.deleteWebhook(req.params.id as string);
 
     if (!deleted) {
       return res.status(404).json({

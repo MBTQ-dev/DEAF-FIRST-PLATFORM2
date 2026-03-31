@@ -15,17 +15,17 @@
     "clean": "rm -rf node_modules dist"
   },
   "dependencies": {
-    "express": "^5.2.1",
-    "cors": "^2.8.5",
-    "ws": "^8.18.0",
-    "dotenv": "^17.2.3",
-    "redis": "^4.7.0",
     "@modelcontextprotocol/sdk": "^1.25.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "redis": "^4.7.0",
+    "ws": "^8.18.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
     "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
     "@types/ws": "^8.5.13",
     "@typescript-eslint/eslint-plugin": "^8.15.0",
@@ -33,6 +33,6 @@
     "eslint": "^9.15.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.5"
+    "vitest": "^4.1.2"
   }
 }
