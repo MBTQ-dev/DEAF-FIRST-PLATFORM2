@@ -1,113 +1,224 @@
-name: Deaf-First Platform CI/CD
+'use strict'
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
+const npa = require('npm-package-arg')
+const semver = require('semver')
+const { checkEngine } = require('npm-install-checks')
+const normalizeBin = require('npm-normalize-package-bin')
 
-env:
-  DENO_VERSION: "1.45.x"
-  SERVICES: "api auth ai sync fibonrose"
+const engineOk = (manifest, npmVersion, nodeVersion) => {
+  try {
+    checkEngine(manifest, npmVersion, nodeVersion)
+    return true
+  } catch (_) {
+    return false
+  }
+}
 
-jobs:
-  # ---------------------------------------------------------
-  # 1. CODE QUALITY
-  # ---------------------------------------------------------
-  code-quality:
-    name: Code Quality
-    runs-on: ubuntu-latest
+const isBefore = (verTimes, ver, time) =>
+  !verTimes || !verTimes[ver] || Date.parse(verTimes[ver]) <= time
 
-    steps:
-      - uses: actions/checkout@v4
+const avoidSemverOpt = { includePrerelease: true, loose: true }
+const shouldAvoid = (ver, avoid) =>
+  avoid && semver.satisfies(ver, avoid, avoidSemverOpt)
 
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: ${{ env.DENO_VERSION }}
+const decorateAvoid = (result, avoid) =>
+  result && shouldAvoid(result.version, avoid)
+    ? { ...result, _shouldAvoid: true }
+    : result
 
-      - name: Format Check
-        run: deno fmt --check
+const pickManifest = (packument, wanted, opts) => {
+  const {
+    defaultTag = 'latest',
+    before = null,
+    nodeVersion = process.version,
+    npmVersion = null,
+    includeStaged = false,
+    avoid = null,
+    avoidStrict = false,
+  } = opts
 
-      - name: Lint
-        run: deno lint
+  const { name, time: verTimes } = packument
+  const versions = packument.versions || {}
 
-      - name: Type Check All Services
-        run: |
-          for svc in $SERVICES; do
-            deno check services/$svc/main.ts
-          done
+  if (avoidStrict) {
+    const looseOpts = {
+      ...opts,
+      avoidStrict: false,
+    }
 
-  # ---------------------------------------------------------
-  # 2. ACCESSIBILITY GATE (DEAF-FIRST)
-  # ---------------------------------------------------------
-  accessibility:
-    name: Deaf-First Accessibility Gate
-    runs-on: ubuntu-latest
-    needs: code-quality
+    const result = pickManifest(packument, wanted, looseOpts)
+    if (!result || !result._shouldAvoid) {
+      return result
+    }
 
-    steps:
-      - uses: actions/checkout@v4
+    const caret = pickManifest(packument, `^${result.version}`, looseOpts)
+    if (!caret || !caret._shouldAvoid) {
+      return {
+        ...caret,
+        _outsideDependencyRange: true,
+        _isSemVerMajor: false,
+      }
+    }
 
-      - name: Enforce Deaf-First Rules
-        run: |
-          echo "♿ Enforcing Deaf-First accessibility rules..."
-          echo "✓ No audio-only flows"
-          echo "✓ Visual-first UX"
-          echo "✓ ASL-native interaction patterns"
-          echo "✓ No missing visual feedback"
-          echo "✓ No inaccessible error states"
-          echo "Accessibility gate passed."
+    const star = pickManifest(packument, '*', looseOpts)
+    if (!star || !star._shouldAvoid) {
+      return {
+        ...star,
+        _outsideDependencyRange: true,
+        _isSemVerMajor: true,
+      }
+    }
 
-  # ---------------------------------------------------------
-  # 3. TESTING
-  # ---------------------------------------------------------
-  tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    needs: accessibility
+    throw Object.assign(new Error(`No avoidable versions for ${name}`), {
+      code: 'ETARGET',
+      name,
+      wanted,
+      avoid,
+      before,
+      versions: Object.keys(versions),
+    })
+  }
 
-    steps:
-      - uses: actions/checkout@v4
+  const staged = (includeStaged && packument.stagedVersions &&
+    packument.stagedVersions.versions) || {}
+  const restricted = (packument.policyRestrictions &&
+    packument.policyRestrictions.versions) || {}
 
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: ${{ env.DENO_VERSION }}
+  const time = before && verTimes ? +(new Date(before)) : Infinity
+  const spec = npa.resolve(name, wanted || defaultTag)
+  const type = spec.type
+  const distTags = packument['dist-tags'] || {}
 
-      - name: Run Tests
-        run: deno test --allow-read
+  if (type !== 'tag' && type !== 'version' && type !== 'range') {
+    throw new Error('Only tag, version, and range are supported')
+  }
 
-  # ---------------------------------------------------------
-  # 4. DEPLOY (MAIN ONLY)
-  # ---------------------------------------------------------
-  deploy:
-    name: Deploy to Deno Deploy
-    runs-on: ubuntu-latest
-    needs: tests
-    if: github.ref == 'refs/heads/main'
+  // if the type is 'tag', and not just the implicit default, then it must
+  // be that exactly, or nothing else will do.
+  if (wanted && type === 'tag') {
+    const ver = distTags[wanted]
+    // if the version in the dist-tags is before the before date, then
+    // we use that.  Otherwise, we get the highest precedence version
+    // prior to the dist-tag.
+    if (isBefore(verTimes, ver, time)) {
+      return decorateAvoid(versions[ver] || staged[ver] || restricted[ver], avoid)
+    } else {
+      return pickManifest(packument, `<=${ver}`, opts)
+    }
+  }
 
-    steps:
-      - uses: actions/checkout@v4
+  // similarly, if a specific version, then only that version will do
+  if (wanted && type === 'version') {
+    const ver = semver.clean(wanted, { loose: true })
+    const mani = versions[ver] || staged[ver] || restricted[ver]
+    return isBefore(verTimes, ver, time) ? decorateAvoid(mani, avoid) : null
+  }
 
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: ${{ env.DENO_VERSION }}
+  // ok, sort based on our heuristics, and pick the best fit
+  const range = type === 'range' ? wanted : '*'
 
-      - name: Install deployctl
-        run: deno install -A -f https://deno.land/x/deploy/deployctl.ts
+  // if the range is *, then we prefer the 'latest' if available
+  // but skip this if it should be avoided, in that case we have
+  // to try a little harder.
+  const defaultVer = distTags[defaultTag]
+  if (defaultVer &&
+      (range === '*' || semver.satisfies(defaultVer, range, { loose: true })) &&
+      !restricted[defaultVer] &&
+      !shouldAvoid(defaultVer, avoid)) {
+    const mani = versions[defaultVer]
+    const ok = mani &&
+      isBefore(verTimes, defaultVer, time) &&
+      engineOk(mani, npmVersion, nodeVersion) &&
+      !mani.deprecated &&
+      !staged[defaultVer]
+    if (ok) {
+      return mani
+    }
+  }
 
-      - name: Deploy Services
-        env:
-          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
-        run: |
-          for svc in $SERVICES; do
-            echo "Deploying $svc..."
-            deployctl deploy \
-              --project=deaf-first-$svc \
-              --prod \
-              --token=$DENO_DEPLOY_TOKEN \
-              services/$svc/main.ts
-          done
+  // ok, actually have to sort the list and take the winner
+  const allEntries = Object.entries(versions)
+    .concat(Object.entries(staged))
+    .concat(Object.entries(restricted))
+    .filter(([ver]) => isBefore(verTimes, ver, time))
 
-      - name: Deployment Complete
-        run: echo "🚀 Deaf-First Platform deployed successfully!"
+  if (!allEntries.length) {
+    throw Object.assign(new Error(`No versions available for ${name}`), {
+      code: 'ENOVERSIONS',
+      name,
+      type,
+      wanted,
+      before,
+      versions: Object.keys(versions),
+    })
+  }
+
+  const sortSemverOpt = { loose: true }
+  const entries = allEntries.filter(([ver]) =>
+    semver.satisfies(ver, range, { loose: true }))
+    .sort((a, b) => {
+      const [vera, mania] = a
+      const [verb, manib] = b
+      const notavoida = !shouldAvoid(vera, avoid)
+      const notavoidb = !shouldAvoid(verb, avoid)
+      const notrestra = !restricted[vera]
+      const notrestrb = !restricted[verb]
+      const notstagea = !staged[vera]
+      const notstageb = !staged[verb]
+      const notdepra = !mania.deprecated
+      const notdeprb = !manib.deprecated
+      const enginea = engineOk(mania, npmVersion, nodeVersion)
+      const engineb = engineOk(manib, npmVersion, nodeVersion)
+      // sort by:
+      // - not an avoided version
+      // - not restricted
+      // - not staged
+      // - not deprecated and engine ok
+      // - engine ok
+      // - not deprecated
+      // - semver
+      return (notavoidb - notavoida) ||
+        (notrestrb - notrestra) ||
+        (notstageb - notstagea) ||
+        ((notdeprb && engineb) - (notdepra && enginea)) ||
+        (engineb - enginea) ||
+        (notdeprb - notdepra) ||
+        semver.rcompare(vera, verb, sortSemverOpt)
+    })
+
+  return decorateAvoid(entries[0] && entries[0][1], avoid)
+}
+
+module.exports = (packument, wanted, opts = {}) => {
+  const mani = pickManifest(packument, wanted, opts)
+  const picked = mani && normalizeBin(mani)
+  const policyRestrictions = packument.policyRestrictions
+  const restricted = (policyRestrictions && policyRestrictions.versions) || {}
+
+  if (picked && !restricted[picked.version]) {
+    return picked
+  }
+
+  const { before = null, defaultTag = 'latest' } = opts
+  const bstr = before ? new Date(before).toLocaleString() : ''
+  const { name } = packument
+  const pckg = `${name}@${wanted}` +
+    (before ? ` with a date before ${bstr}` : '')
+
+  const isForbidden = picked && !!restricted[picked.version]
+  const polMsg = isForbidden ? policyRestrictions.message : ''
+
+  const msg = !isForbidden ? `No matching version found for ${pckg}.`
+    : `Could not download ${pckg} due to policy violations:\n${polMsg}`
+
+  const code = isForbidden ? 'E403' : 'ETARGET'
+  throw Object.assign(new Error(msg), {
+    code,
+    type: npa.resolve(packument.name, wanted).type,
+    wanted,
+    versions: Object.keys(packument.versions ?? {}),
+    name,
+    distTags: packument['dist-tags'],
+    defaultTag,
+  })
+}
