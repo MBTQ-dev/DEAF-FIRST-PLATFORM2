@@ -1,13 +1,1504 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DEAF-FIRST Platform</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MBTQ Deaf-First Platform — Open Source</title>
+  <meta name="description" content="A Deaf-first SaaS ecosystem with AI-powered workflows, comprehensive accessibility, and decentralized governance. Built by 360 Magicians." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #070a10;
+      --surface:   #0d1220;
+      --border:    #1e2840;
+      --pink:      #f72585;
+      --violet:    #7209b7;
+      --cyan:      #4cc9f0;
+      --teal:      #06d6a0;
+      --amber:     #ffb703;
+      --text:      #e8edf8;
+      --muted:     #6b7a99;
+      --card-bg:   #0f1628;
+      --glow-pink: rgba(247, 37, 133, 0.18);
+      --glow-cyan: rgba(76, 201, 240, 0.14);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ─── NOISE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: .5;
+    }
+
+    /* ─── GRID BACKGROUND ─── */
+    .grid-bg {
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(76,201,240,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(76,201,240,.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 60px;
+      background: rgba(7,10,16,.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: .04em;
+      color: var(--text);
+      text-decoration: none;
+      display: flex; align-items: center; gap: .5rem;
+    }
+
+    .nav-logo span { color: var(--pink); }
+
+    .nav-links {
+      display: flex; gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .875rem;
+      font-weight: 500;
+      letter-spacing: .02em;
+      transition: color .2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      display: flex; gap: .75rem;
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .45rem 1.1rem;
+      border-radius: 6px;
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .2s;
+      border: none;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--cyan);
+      background: rgba(76,201,240,.06);
+    }
+
+    .btn-primary {
+      background: var(--pink);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(247,37,133,.3);
+    }
+
+    .btn-primary:hover {
+      background: #e0177a;
+      box-shadow: 0 0 30px rgba(247,37,133,.5);
+      transform: translateY(-1px);
+    }
+
+    /* ─── SECTIONS ─── */
+    section { position: relative; z-index: 1; }
+
+    /* ─── HERO ─── */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 4rem;
+      overflow: hidden;
+    }
+
+    .hero-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+    }
+
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(247,37,133,.22), transparent 70%);
+      top: -100px; left: -100px;
+      animation: drift1 12s ease-in-out infinite;
+    }
+
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(76,201,240,.16), transparent 70%);
+      bottom: -80px; right: -80px;
+      animation: drift2 14s ease-in-out infinite;
+    }
+
+    .orb-3 {
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(114,9,183,.2), transparent 70%);
+      top: 40%; left: 50%; transform: translate(-50%,-50%);
+      animation: drift3 10s ease-in-out infinite;
+    }
+
+    @keyframes drift1 {
+      0%,100% { transform: translate(0,0); }
+      50% { transform: translate(40px, 30px); }
+    }
+    @keyframes drift2 {
+      0%,100% { transform: translate(0,0); }
+      50% { transform: translate(-30px, -40px); }
+    }
+    @keyframes drift3 {
+      0%,100% { transform: translate(-50%,-50%) scale(1); }
+      50% { transform: translate(-50%,-50%) scale(1.15); }
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .3rem .8rem;
+      background: rgba(76,201,240,.08);
+      border: 1px solid rgba(76,201,240,.25);
+      border-radius: 20px;
+      font-family: 'DM Mono', monospace;
+      font-size: .75rem;
+      color: var(--cyan);
+      letter-spacing: .06em;
+      margin-bottom: 1.5rem;
+      animation: fadeUp .6s ease both;
+    }
+
+    .badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: .3; }
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -.02em;
+      max-width: 900px;
+      animation: fadeUp .7s .1s ease both;
+    }
+
+    h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--pink), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      margin-top: 1.25rem;
+      max-width: 600px;
+      font-size: 1.1rem;
+      color: var(--muted);
+      line-height: 1.7;
+      animation: fadeUp .7s .2s ease both;
+    }
+
+    .hero-cta {
+      margin-top: 2.25rem;
+      display: flex; gap: 1rem;
+      flex-wrap: wrap; justify-content: center;
+      animation: fadeUp .7s .3s ease both;
+    }
+
+    .btn-lg {
+      padding: .75rem 1.75rem;
+      font-size: .95rem;
+      border-radius: 8px;
+    }
+
+    .hero-stats {
+      margin-top: 4rem;
+      display: flex; gap: 3rem;
+      flex-wrap: wrap; justify-content: center;
+      animation: fadeUp .7s .45s ease both;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .stat-num span { color: var(--pink); }
+
+    .stat-label {
+      font-size: .8rem;
+      color: var(--muted);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-top: .1rem;
+    }
+
+    /* ─── WCAG BANNER ─── */
+    .wcag-bar {
+      background: linear-gradient(90deg, rgba(6,214,160,.08), rgba(76,201,240,.08));
+      border-top: 1px solid rgba(6,214,160,.2);
+      border-bottom: 1px solid rgba(6,214,160,.2);
+      padding: .8rem 2rem;
+      display: flex; gap: 2rem; flex-wrap: wrap;
+      align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: .78rem;
+      color: var(--teal);
+      letter-spacing: .04em;
+    }
+
+    .wcag-bar span { opacity: .5; }
+
+    /* ─── SERVICES ─── */
+    #services { padding: 6rem 2rem; }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: .75rem;
+      color: var(--pink);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: .75rem;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.75rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      line-height: 1.15;
+      max-width: 600px;
+    }
+
+    .section-sub {
+      margin-top: .75rem;
+      color: var(--muted);
+      max-width: 560px;
+      font-size: .95rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .services-grid {
+      margin-top: 3.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .service-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .25s, transform .25s;
+      cursor: default;
+    }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 50%), rgba(247,37,133,.06), transparent 40%);
+      opacity: 0;
+      transition: opacity .3s;
+      pointer-events: none;
+    }
+
+    .service-card:hover::before { opacity: 1; }
+
+    .service-card:hover {
+      border-color: rgba(247,37,133,.35);
+      transform: translateY(-3px);
+    }
+
+    .service-card.cyan:hover { border-color: rgba(76,201,240,.35); }
+    .service-card.teal:hover { border-color: rgba(6,214,160,.35); }
+    .service-card.violet:hover { border-color: rgba(114,9,183,.5); }
+    .service-card.amber:hover { border-color: rgba(255,183,3,.35); }
+
+    .service-port {
+      font-family: 'DM Mono', monospace;
+      font-size: .7rem;
+      color: var(--muted);
+      letter-spacing: .06em;
+      margin-bottom: 1rem;
+    }
+
+    .service-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+
+    .icon-pink   { background: rgba(247,37,133,.12); color: var(--pink); }
+    .icon-cyan   { background: rgba(76,201,240,.12);  color: var(--cyan); }
+    .icon-teal   { background: rgba(6,214,160,.12);   color: var(--teal); }
+    .icon-violet { background: rgba(114,9,183,.18);   color: #b56fff; }
+    .icon-amber  { background: rgba(255,183,3,.12);   color: var(--amber); }
+
+    .service-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: .35rem;
+    }
+
+    .service-desc {
+      font-size: .875rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
+    }
+
+    .service-tags {
+      display: flex; flex-wrap: wrap; gap: .4rem;
+    }
+
+    .tag {
+      font-family: 'DM Mono', monospace;
+      font-size: .68rem;
+      padding: .2rem .55rem;
+      border-radius: 4px;
+      letter-spacing: .04em;
+    }
+
+    .tag-pink   { background: rgba(247,37,133,.1);  color: var(--pink);  border: 1px solid rgba(247,37,133,.2); }
+    .tag-cyan   { background: rgba(76,201,240,.1);  color: var(--cyan);  border: 1px solid rgba(76,201,240,.2); }
+    .tag-teal   { background: rgba(6,214,160,.1);   color: var(--teal);  border: 1px solid rgba(6,214,160,.2); }
+    .tag-violet { background: rgba(114,9,183,.12);  color: #b56fff;      border: 1px solid rgba(114,9,183,.3); }
+    .tag-amber  { background: rgba(255,183,3,.1);   color: var(--amber); border: 1px solid rgba(255,183,3,.2); }
+    .tag-muted  { background: rgba(107,122,153,.1); color: var(--muted); border: 1px solid rgba(107,122,153,.2); }
+
+    /* ─── DEAF-FIRST PRINCIPLES ─── */
+    #principles { padding: 6rem 2rem; background: linear-gradient(180deg, transparent, rgba(247,37,133,.03), transparent); }
+
+    .principles-grid {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .principle-card {
+      background: linear-gradient(135deg, rgba(13,18,32,.9), rgba(13,18,32,.6));
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      display: flex; flex-direction: column; gap: .75rem;
+    }
+
+    .principle-num {
+      font-family: 'DM Mono', monospace;
+      font-size: .7rem;
+      color: var(--pink);
+      letter-spacing: .1em;
+    }
+
+    .principle-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .principle-text {
+      font-size: .83rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ─── ARCHITECTURE ─── */
+    #architecture { padding: 6rem 2rem; }
+
+    .arch-layout {
+      margin-top: 3.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    .arch-diagram {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      font-family: 'DM Mono', monospace;
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .arch-row {
+      display: flex; align-items: center;
+      gap: .75rem;
+      padding: .6rem .75rem;
+      border-radius: 6px;
+      margin-bottom: .4rem;
+      transition: background .2s;
+    }
+
+    .arch-row:hover { background: rgba(255,255,255,.03); }
+
+    .arch-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-pink   { background: var(--pink);   box-shadow: 0 0 8px var(--pink); }
+    .dot-cyan   { background: var(--cyan);   box-shadow: 0 0 8px var(--cyan); }
+    .dot-teal   { background: var(--teal);   box-shadow: 0 0 8px var(--teal); }
+    .dot-violet { background: #b56fff;       box-shadow: 0 0 8px #b56fff; }
+    .dot-amber  { background: var(--amber);  box-shadow: 0 0 8px var(--amber); }
+
+    .arch-label { flex: 1; }
+    .arch-port {
+      color: rgba(107,122,153,.6);
+      font-size: .7rem;
+    }
+
+    .arch-arrow {
+      text-align: center;
+      color: rgba(107,122,153,.4);
+      font-size: .7rem;
+      margin: .4rem 0;
+    }
+
+    .arch-section-label {
+      font-size: .65rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: rgba(107,122,153,.5);
+      padding: .3rem .75rem;
+      margin-top: .5rem;
+    }
+
+    .arch-desc { display: flex; flex-direction: column; gap: 1.5rem; }
+
+    .arch-item h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: .95rem;
+      font-weight: 700;
+      margin-bottom: .4rem;
+    }
+
+    .arch-item p {
+      font-size: .85rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ─── STACK ─── */
+    #stack { padding: 5rem 2rem; }
+
+    .stack-grid {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: .75rem;
+    }
+
+    .stack-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: .75rem;
+      font-size: .875rem;
+      font-weight: 500;
+      transition: border-color .2s;
+    }
+
+    .stack-item:hover { border-color: rgba(76,201,240,.3); }
+
+    .stack-icon {
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      background: rgba(255,255,255,.05);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    /* ─── INSTALL / QUICKSTART ─── */
+    #quickstart { padding: 6rem 2rem; }
+
+    .code-block {
+      background: #050810;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .65rem 1rem;
+      background: rgba(255,255,255,.02);
+      border-bottom: 1px solid var(--border);
+      font-size: .75rem;
+      color: var(--muted);
+    }
+
+    .code-dots { display: flex; gap: .4rem; }
+    .code-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .cd-red    { background: #ff5f56; }
+    .cd-yellow { background: #ffbd2e; }
+    .cd-green  { background: #27c93f; }
+
+    .code-body {
+      padding: 1.25rem 1.5rem;
+      font-size: .82rem;
+      line-height: 1.9;
+      overflow-x: auto;
+    }
+
+    .code-body .c-comment { color: var(--muted); }
+    .code-body .c-cmd     { color: var(--cyan); }
+    .code-body .c-str     { color: var(--teal); }
+    .code-body .c-key     { color: var(--pink); }
+
+    .qs-grid {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .qs-step {
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+
+    .step-num {
+      font-family: 'DM Mono', monospace;
+      font-size: .7rem;
+      color: var(--pink);
+      letter-spacing: .1em;
+    }
+
+    .step-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    /* ─── ENDPOINTS ─── */
+    #endpoints { padding: 5rem 2rem; }
+
+    .endpoint-list {
+      margin-top: 2.5rem;
+      display: flex; flex-direction: column; gap: .5rem;
+    }
+
+    .endpoint-row {
+      display: flex; align-items: center; gap: 1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .7rem 1.25rem;
+      transition: border-color .2s;
+    }
+
+    .endpoint-row:hover { border-color: rgba(76,201,240,.3); }
+
+    .method {
+      font-family: 'DM Mono', monospace;
+      font-size: .72rem;
+      font-weight: 500;
+      padding: .2rem .5rem;
+      border-radius: 4px;
+      min-width: 52px;
+      text-align: center;
+      letter-spacing: .04em;
+    }
+
+    .method-get  { background: rgba(6,214,160,.12);  color: var(--teal); }
+    .method-post { background: rgba(76,201,240,.12);  color: var(--cyan); }
+
+    .endpoint-path {
+      font-family: 'DM Mono', monospace;
+      font-size: .82rem;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .endpoint-desc {
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    .endpoint-group {
+      font-family: 'DM Mono', monospace;
+      font-size: .7rem;
+      color: var(--muted);
+      letter-spacing: .06em;
+      margin-top: 1.5rem;
+      margin-bottom: .5rem;
+    }
+
+    /* ─── CONTRIBUTING ─── */
+    #contributing { padding: 6rem 2rem; }
+
+    .contrib-grid {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .contrib-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: border-color .2s, transform .2s;
+    }
+
+    .contrib-card:hover {
+      border-color: rgba(247,37,133,.3);
+      transform: translateY(-2px);
+    }
+
+    .contrib-icon { font-size: 1.5rem; margin-bottom: .75rem; }
+    .contrib-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: .4rem;
+    }
+
+    .contrib-text {
+      font-size: .83rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ─── CTA FOOTER ─── */
+    #cta-footer {
+      padding: 7rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #cta-footer::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 800px 400px at 50% 50%, rgba(247,37,133,.09), transparent);
+      pointer-events: none;
+    }
+
+    #cta-footer h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.1;
+      max-width: 700px;
+      margin: 0 auto 1.25rem;
+    }
+
+    #cta-footer p {
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto 2.5rem;
+      font-size: .95rem;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1.5rem;
+      position: relative; z-index: 1;
+    }
+
+    .footer-brand {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: .95rem;
+    }
+
+    .footer-brand span { color: var(--pink); }
+
+    .footer-links {
+      display: flex; gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .83rem;
+      transition: color .2s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    .footer-license {
+      font-family: 'DM Mono', monospace;
+      font-size: .72rem;
+      color: var(--muted);
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      nav { display: none; }
+      .arch-layout, .qs-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 2.4rem; }
+      .hero-stats { gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">MBTQ<span>.</span>dev</a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#principles">Deaf-First</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#quickstart">Quick Start</a></li>
+    <li><a href="#endpoints">API</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="https://github.com/pinkycollie/DEAF-FIRST-PLATFORM" class="btn btn-ghost" target="_blank">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.1.82-.26.82-.58v-2.03c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.13 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </a>
+    <a href="https://mbtq.dev" class="btn btn-primary" target="_blank">Live Platform →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-orb orb-1"></div>
+  <div class="hero-orb orb-2"></div>
+  <div class="hero-orb orb-3"></div>
+
+  <div class="badge">MIT Licensed · Open Source</div>
+
+  <h1>Built <em>Deaf-First.</em><br>Powered by the Community.</h1>
+
+  <p class="hero-sub">
+    A Deaf-centered, accessibility-native SaaS platform with AI-powered workflows,
+    decentralized trust scoring, and government-grade compliance infrastructure.
+    Five core services. One open ecosystem.
+  </p>
+
+  <div class="hero-cta">
+    <a href="https://github.com/pinkycollie/DEAF-FIRST-PLATFORM" class="btn btn-primary btn-lg" target="_blank">
+      View on GitHub
+    </a>
+    <a href="#quickstart" class="btn btn-ghost btn-lg">Quick Start</a>
+    <a href="#services" class="btn btn-ghost btn-lg">Explore Services</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">5<span>+</span></div>
+      <div class="stat-label">Core Services</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">60<span>+</span></div>
+      <div class="stat-label">API Endpoints</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">WCAG</div>
+      <div class="stat-label">2.1 AAA</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">MIT</div>
+      <div class="stat-label">License</div>
+    </div>
+  </div>
+</section>
+
+<!-- WCAG BANNER -->
+<div class="wcag-bar">
+  <span>♿</span> WCAG 2.1 AAA Compliant
+  <span>·</span> Caption-First Video
+  <span>·</span> ASL Priority Overlays
+  <span>·</span> Visual-Only Alerts
+  <span>·</span> 2-Second Rule Enforced
+  <span>·</span> Lifetime Accommodation Registration
+  <span>·</span> No Audio Dependencies
+</div>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="container">
+    <p class="section-label">Core Services</p>
+    <h2 class="section-title">Five services. One unified mesh.</h2>
+    <p class="section-sub">Each service is independently deployable, OpenAPI 3.1 documented, and connected through DeafAUTH's PASETO token fabric.</p>
+
+    <div class="services-grid">
+
+      <div class="service-card" data-color="pink">
+        <div class="service-port">:3002 · auth.mbtq.dev</div>
+        <div class="service-icon icon-pink">🔐</div>
+        <div class="service-name">DeafAUTH — Identity Cortex</div>
+        <div class="service-desc">
+          Secure authentication designed for Deaf users first. PASETO v4 tokens, MCP server support, accessible auth flows, and user preference management. The single auth source for all MBTQ services.
+        </div>
+        <div class="service-tags">
+          <span class="tag tag-pink">PASETO v4</span>
+          <span class="tag tag-muted">MCP Server</span>
+          <span class="tag tag-muted">Register</span>
+          <span class="tag tag-muted">Login</span>
+          <span class="tag tag-muted">Verify</span>
+          <span class="tag tag-muted">Refresh</span>
+        </div>
+      </div>
+
+      <div class="service-card cyan">
+        <div class="service-port">:3003 · sync.mbtq.dev</div>
+        <div class="service-icon icon-cyan">⚡</div>
+        <div class="service-name">PinkSync — Accessibility Engine</div>
+        <div class="service-desc">
+          Real-time accessibility synchronization with WebSocket-based pub/sub, Redis backbone, and Cloudflare Workers + Durable Objects. Handles accessibility preferences across all MBTQ subdomains.
+        </div>
+        <div class="service-tags">
+          <span class="tag tag-cyan">WebSocket</span>
+          <span class="tag tag-muted">Redis</span>
+          <span class="tag tag-muted">Cloudflare Workers</span>
+          <span class="tag tag-muted">Durable Objects</span>
+        </div>
+      </div>
+
+      <div class="service-card teal">
+        <div class="service-port">:3004 · trust.mbtq.dev</div>
+        <div class="service-icon icon-teal">🌿</div>
+        <div class="service-name">Fibronrose — Trust & Blockchain</div>
+        <div class="service-desc">
+          Fibonacci-decay trust scoring across all subdomains. ERC-1155 trust badges, ERC-20 FIBR token, and Neon.tech for numeric workloads. Golden-ratio threshold (0.382). ML scoring via Vertex AI / Gemini.
+        </div>
+        <div class="service-tags">
+          <span class="tag tag-teal">Trust Score</span>
+          <span class="tag tag-muted">ERC-1155</span>
+          <span class="tag tag-muted">Fibonacci Decay</span>
+          <span class="tag tag-muted">Vertex AI</span>
+        </div>
+      </div>
+
+      <div class="service-card violet">
+        <div class="service-port">:3006 · dynamic · ai.mbtq.dev</div>
+        <div class="service-icon icon-violet">🤖</div>
+        <div class="service-name">360Magicians — AI Agents</div>
+        <div class="service-desc">
+          Comprehensive AI agent platform: agent lifecycle, task execution, memory management, file ingestion, RAG search, tool registry, scheduling, webhooks, and cost analytics. Port resolved at runtime.
+        </div>
+        <div class="service-tags">
+          <span class="tag tag-violet">60+ Endpoints</span>
+          <span class="tag tag-muted">RAG</span>
+          <span class="tag tag-muted">Ollama</span>
+          <span class="tag tag-muted">Gemini</span>
+          <span class="tag tag-muted">Claude</span>
+        </div>
+      </div>
+
+      <div class="service-card amber">
+        <div class="service-port">:3007 · dynamic · dao.mbtq.dev</div>
+        <div class="service-icon icon-amber">🏛️</div>
+        <div class="service-name">MBTQ DAO — Governance</div>
+        <div class="service-desc">
+          Decentralized governance and community management. Proposals, voting, member management, and community-driven autonomous platform evolution powered by RAG on Vertex AI. Port resolved at runtime.
+        </div>
+        <div class="service-tags">
+          <span class="tag tag-amber">DAO</span>
+          <span class="tag tag-muted">Proposals</span>
+          <span class="tag tag-muted">Voting</span>
+          <span class="tag tag-muted">Vertex AI</span>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-port">:3005 · a11y.mbtq.dev</div>
+        <div class="service-icon icon-pink">♿</div>
+        <div class="service-name">a11y — Accessibility Nodes</div>
+        <div class="service-desc">
+          Modular accessibility features: sign language interpretation overlays, visual accessibility enhancements, MCP server for accessibility APIs, and the video SDK (MBTQVideoSDK) for Deaf-first communications.
+        </div>
+        <div class="service-tags">
+          <span class="tag tag-pink">ASL Video</span>
+          <span class="tag tag-muted">MCP Server</span>
+          <span class="tag tag-muted">Visual Alerts</span>
+          <span class="tag tag-muted">Captions</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- DEAF-FIRST PRINCIPLES -->
+<section id="principles">
+  <div class="container">
+    <p class="section-label">Deaf-First Design</p>
+    <h2 class="section-title">Not accessible. Deaf-native.</h2>
+    <p class="section-sub">These aren't guidelines — they're hard constraints enforced at the code and policy level across every service.</p>
+
+    <div class="principles-grid reveal">
+
+      <div class="principle-card">
+        <div class="principle-num">RULE 01</div>
+        <div class="principle-title">The 2-Second Rule</div>
+        <div class="principle-text">A Deaf user must understand system state within 2 seconds of first render. No audio dependency. Visual-first, always.</div>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-num">RULE 02</div>
+        <div class="principle-title">Caption-First Video</div>
+        <div class="principle-text">Captions are never hidden, never delayed, never optional. They are the primary communication channel — not a fallback.</div>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-num">RULE 03</div>
+        <div class="principle-title">Visual-Only Alerts</div>
+        <div class="principle-text">All system notifications, errors, and status changes are communicated visually. Zero audio-only notification paths exist in any service.</div>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-num">RULE 04</div>
+        <div class="principle-title">ASL Priority Overlays</div>
+        <div class="principle-text">Sign language interfaces receive the highest design priority. The a11y service's floating MBTQVideoSDK panel with drag, resize, and minimize is always accessible.</div>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-num">RULE 05</div>
+        <div class="principle-title">Lifetime Support Registration</div>
+        <div class="principle-text">Accommodation needs are registered permanently in the system. They never expire, never require re-verification, and propagate across all services via PinkSync.</div>
+      </div>
+
+      <div class="principle-card">
+        <div class="principle-num">RULE 06</div>
+        <div class="principle-title">WCAG 2.1 AAA Enforced</div>
+        <div class="principle-text">The ESLint plugin (eslint-plugin-mbtq) enforces WCAG 2.1 AAA compliance at the code level — not just as a guideline in a README.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="container">
+    <p class="section-label">Architecture</p>
+    <h2 class="section-title">Edge-native. Vendor-agnostic.</h2>
+    <p class="section-sub">Cloudflare Tunnel for all public traffic — no exposed ports. PASETO v4 over JWT. A single gateway entry point for all external requests.</p>
+
+    <div class="arch-layout reveal">
+      <div class="arch-diagram">
+        <div class="arch-section-label">EXTERNAL TRAFFIC</div>
+        <div class="arch-row">
+          <div class="arch-dot dot-pink"></div>
+          <div class="arch-label">@mbtq/gateway</div>
+          <div class="arch-port">auth → trust → normalize → route → audit</div>
+        </div>
+        <div class="arch-arrow">↓</div>
+
+        <div class="arch-section-label">AUTH MESH</div>
+        <div class="arch-row">
+          <div class="arch-dot dot-pink"></div>
+          <div class="arch-label">DeafAUTH</div>
+          <div class="arch-port">:3002</div>
+        </div>
+        <div class="arch-row">
+          <div class="arch-dot dot-cyan"></div>
+          <div class="arch-label">PinkSync</div>
+          <div class="arch-port">:3003</div>
+        </div>
+        <div class="arch-row">
+          <div class="arch-dot dot-teal"></div>
+          <div class="arch-label">Fibronrose</div>
+          <div class="arch-port">:3004 · 0.382 threshold</div>
+        </div>
+        <div class="arch-row">
+          <div class="arch-dot dot-violet"></div>
+          <div class="arch-label">a11y</div>
+          <div class="arch-port">:3005</div>
+        </div>
+        <div class="arch-arrow">↓</div>
+
+        <div class="arch-section-label">DYNAMIC PORTS (runtime resolved)</div>
+        <div class="arch-row">
+          <div class="arch-dot dot-violet"></div>
+          <div class="arch-label">360Magicians / AI</div>
+          <div class="arch-port">:3006 · Deno tunnel</div>
+        </div>
+        <div class="arch-row">
+          <div class="arch-dot dot-amber"></div>
+          <div class="arch-label">MBTQ DAO</div>
+          <div class="arch-port">:3007 · Cloudflare tunnel</div>
+        </div>
+        <div class="arch-arrow">↓</div>
+
+        <div class="arch-section-label">DATA FLOW</div>
+        <div class="arch-row">
+          <div class="arch-dot dot-cyan"></div>
+          <div class="arch-label">pinkflow.mbtq.dev → DAO gate → api.pinksync.io</div>
+          <div class="arch-port"></div>
+        </div>
+      </div>
+
+      <div class="arch-desc">
+        <div class="arch-item">
+          <h4>🔒 PASETO v4 Token Fabric</h4>
+          <p>All inter-service auth uses PASETO v4 (preferred over JWT). PinkSync activation requires a per-user or enterprise-level PASETO token. The gateway is upstream of PinkSync.</p>
+        </div>
+        <div class="arch-item">
+          <h4>⚡ Five-Stage Gateway Pipeline</h4>
+          <p>Every external request flows through: auth → trust score → normalize → route → audit. HotChannel WebSocket audit interception logs every significant event.</p>
+        </div>
+        <div class="arch-item">
+          <h4>🌐 Cloudflare Tunnel — No Exposed Ports</h4>
+          <p>All public traffic routes through Cloudflare Tunnel. Ports 3006+ are dynamic and must never be hardcoded — resolved at runtime via Deno and Cloudflare tunnel bindings.</p>
+        </div>
+        <div class="arch-item">
+          <h4>📦 Monorepo with Package Standards</h4>
+          <p>All packages use <code style="color:var(--cyan);font-family:DM Mono,monospace;font-size:.85em">mbtq-</code> prefix or <code style="color:var(--cyan);font-family:DM Mono,monospace;font-size:.85em">@mbtq/</code> scope. Self-hosted Verdaccio for scoped packages. Two-repo split: mbtq-dev (public), mbtq-core (private).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section id="stack">
+  <div class="container">
+    <p class="section-label">Tech Stack</p>
+    <h2 class="section-title">Production-grade, edge-native infrastructure.</h2>
+
+    <div class="stack-grid reveal">
+      <div class="stack-item"><div class="stack-icon">🦕</div> Deno KV</div>
+      <div class="stack-item"><div class="stack-icon">⚡</div> Cloudflare Workers</div>
+      <div class="stack-item"><div class="stack-icon">🔥</div> Hono</div>
+      <div class="stack-item"><div class="stack-icon">🐘</div> Supabase (Auth/RLS)</div>
+      <div class="stack-item"><div class="stack-icon">🌿</div> Neon.tech</div>
+      <div class="stack-item"><div class="stack-icon">🤖</div> Ollama (local AI)</div>
+      <div class="stack-item"><div class="stack-icon">🧠</div> Vertex AI / Gemini</div>
+      <div class="stack-item"><div class="stack-icon">⚛️</div> Next.js (UI only)</div>
+      <div class="stack-item"><div class="stack-icon">🟢</div> Node.js ≥ 20</div>
+      <div class="stack-item"><div class="stack-icon">📘</div> TypeScript</div>
+      <div class="stack-item"><div class="stack-icon">🐳</div> Docker</div>
+      <div class="stack-item"><div class="stack-icon">🔄</div> Redis</div>
+      <div class="stack-item"><div class="stack-icon">🐙</div> GitHub Actions (CI)</div>
+      <div class="stack-item"><div class="stack-icon">🦀</div> Rust / Cargo (CI)</div>
+      <div class="stack-item"><div class="stack-icon">☁️</div> GCP / Kubernetes</div>
+      <div class="stack-item"><div class="stack-icon">🔐</div> PASETO v4</div>
+    </div>
+  </div>
+</section>
+
+<!-- QUICK START -->
+<section id="quickstart">
+  <div class="container">
+    <p class="section-label">Quick Start</p>
+    <h2 class="section-title">Up and running in four commands.</h2>
+    <p class="section-sub">Node.js ≥ 20.0.0 and npm ≥ 10.0.0 required. PostgreSQL and Redis for full stack.</p>
+
+    <div class="qs-grid reveal">
+      <div class="qs-step">
+        <div class="step-num">STEP 01</div>
+        <div class="step-title">Clone & Install</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots">
+              <div class="code-dot cd-red"></div>
+              <div class="code-dot cd-yellow"></div>
+              <div class="code-dot cd-green"></div>
+            </div>
+            <span>bash</span>
+          </div>
+          <div class="code-body">
+<span class="c-comment"># Clone the repository</span>
+<span class="c-cmd">git clone</span> <span class="c-str">https://github.com/pinkycollie/</span>
+<span class="c-str">  DEAF-FIRST-PLATFORM.git</span>
+<span class="c-cmd">cd</span> DEAF-FIRST-PLATFORM
+<span class="c-cmd">npm install</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="qs-step">
+        <div class="step-num">STEP 02</div>
+        <div class="step-title">Configure Environment</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots">
+              <div class="code-dot cd-red"></div>
+              <div class="code-dot cd-yellow"></div>
+              <div class="code-dot cd-green"></div>
+            </div>
+            <span>.env</span>
+          </div>
+          <div class="code-body">
+<span class="c-cmd">cp</span> .env.example .env
+
+<span class="c-comment"># Required vars:</span>
+<span class="c-key">DATABASE_URL</span>=postgresql://...
+<span class="c-key">REDIS_URL</span>=redis://localhost:6379
+<span class="c-key">JWT_SECRET</span>=your-secret-key
+<span class="c-key">DEAFAUTH_PORT</span>=3002
+          </div>
+        </div>
+      </div>
+
+      <div class="qs-step">
+        <div class="step-num">STEP 03</div>
+        <div class="step-title">Validate & Test</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots">
+              <div class="code-dot cd-red"></div>
+              <div class="code-dot cd-yellow"></div>
+              <div class="code-dot cd-green"></div>
+            </div>
+            <span>bash</span>
+          </div>
+          <div class="code-body">
+<span class="c-comment"># Validate OpenAPI specs</span>
+<span class="c-cmd">npm run</span> validate:openapi
+
+<span class="c-comment"># Run all tests</span>
+<span class="c-cmd">npm test</span>
+
+<span class="c-comment"># Run with coverage</span>
+<span class="c-cmd">npm run</span> test:coverage
+          </div>
+        </div>
+      </div>
+
+      <div class="qs-step">
+        <div class="step-num">STEP 04</div>
+        <div class="step-title">Start All Services</div>
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots">
+              <div class="code-dot cd-red"></div>
+              <div class="code-dot cd-yellow"></div>
+              <div class="code-dot cd-green"></div>
+            </div>
+            <span>bash</span>
+          </div>
+          <div class="code-body">
+<span class="c-comment"># All services</span>
+<span class="c-cmd">npm run</span> dev
+
+<span class="c-comment"># Or individually</span>
+<span class="c-cmd">npm run</span> dev:deafauth
+<span class="c-cmd">npm run</span> dev:pinksync
+<span class="c-cmd">npm run</span> dev:fibonrose
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ENDPOINTS -->
+<section id="endpoints">
+  <div class="container">
+    <p class="section-label">API Reference</p>
+    <h2 class="section-title">OpenAPI 3.1 documented. Every endpoint.</h2>
+    <p class="section-sub">All services share the DeafAUTH security scheme. Include <code style="color:var(--cyan);font-family:DM Mono,monospace;font-size:.9em">Authorization: Bearer &lt;token&gt;</code> in every request.</p>
+
+    <div class="endpoint-list reveal">
+
+      <div class="endpoint-group">// DeafAUTH — :3002</div>
+      <div class="endpoint-row">
+        <span class="method method-post">POST</span>
+        <span class="endpoint-path">/auth/register</span>
+        <span class="endpoint-desc">User registration with accessibility preference capture</span>
+      </div>
+      <div class="endpoint-row">
+        <span class="method method-post">POST</span>
+        <span class="endpoint-path">/auth/login</span>
+        <span class="endpoint-desc">Authenticate and receive PASETO v4 token pair</span>
+      </div>
+      <div class="endpoint-row">
+        <span class="method method-get">GET</span>
+        <span class="endpoint-path">/auth/verify</span>
+        <span class="endpoint-desc">Token verification and user context resolution</span>
+      </div>
+      <div class="endpoint-row">
+        <span class="method method-post">POST</span>
+        <span class="endpoint-path">/auth/refresh</span>
+        <span class="endpoint-desc">Rotate refresh token and issue new access token</span>
+      </div>
+
+      <div class="endpoint-group">// PinkSync — :3003</div>
+      <div class="endpoint-row">
+        <span class="method method-get">GET</span>
+        <span class="endpoint-path">/sync/status</span>
+        <span class="endpoint-desc">Check synchronization status across services</span>
+      </div>
+      <div class="endpoint-row">
+        <span class="method method-post">POST</span>
+        <span class="endpoint-path">/sync/preferences</span>
+        <span class="endpoint-desc">Update accessibility preferences (propagates to all services)</span>
+      </div>
+      <div class="endpoint-row">
+        <span class="method method-get">GET</span>
+        <span class="endpoint-path">/sync/features</span>
+        <span class="endpoint-desc">List available accessibility feature flags</span>
+      </div>
+
+      <div class="endpoint-group">// Fibronrose — :3004</div>
+      <div class="endpoint-row">
+        <span class="method method-post">POST</span>
+        <span class="endpoint-path">/trust/verify</span>
+        <span class="endpoint-desc">Verify blockchain transaction against trust ledger</span>
+      </div>
+      <div class="endpoint-row">
+        <span class="method method-get">GET</span>
+        <span class="endpoint-path">/trust/score</span>
+        <span class="endpoint-desc">Retrieve Fibonacci-decay trust score (threshold: 0.382)</span>
+      </div>
+      <div class="endpoint-row">
+        <span class="method method-post">POST</span>
+        <span class="endpoint-path">/trust/record</span>
+        <span class="endpoint-desc">Record new interaction to trust ledger (ERC-1155)</span>
+      </div>
+
+      <div class="endpoint-group">// DAO — :3007 (dynamic)</div>
+      <div class="endpoint-row">
+        <span class="method method-get">GET</span>
+        <span class="endpoint-path">/dao/proposals</span>
+        <span class="endpoint-desc">List open governance proposals with vote counts</span>
+      </div>
+      <div class="endpoint-row">
+        <span class="method method-post">POST</span>
+        <span class="endpoint-path">/dao/vote</span>
+        <span class="endpoint-desc">Submit community vote on active proposal</span>
+      </div>
+      <div class="endpoint-row">
+        <span class="method method-get">GET</span>
+        <span class="endpoint-path">/dao/members</span>
+        <span class="endpoint-desc">List DAO members with trust scores and roles</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CONTRIBUTING -->
+<section id="contributing">
+  <div class="container">
+    <p class="section-label">Open Source</p>
+    <h2 class="section-title">Build with us.</h2>
+    <p class="section-sub">All contributions must maintain WCAG 2.1 AAA compliance and Deaf-first principles. Use Conventional Commits. CI must pass.</p>
+
+    <div class="contrib-grid reveal">
+      <div class="contrib-card">
+        <div class="contrib-icon">🍴</div>
+        <div class="contrib-title">Fork & Branch</div>
+        <div class="contrib-text">Fork the repo, create a feature branch (<code style="font-family:DM Mono,monospace;font-size:.85em;color:var(--cyan)">feat/your-feature</code>), and follow the Conventional Commits spec for all commit messages.</div>
+      </div>
+      <div class="contrib-card">
+        <div class="contrib-icon">♿</div>
+        <div class="contrib-title">Accessibility Required</div>
+        <div class="contrib-text">Every PR must maintain WCAG 2.1 AAA compliance. The ESLint plugin (eslint-plugin-mbtq) enforces this at the code level — failing checks block merge.</div>
+      </div>
+      <div class="contrib-card">
+        <div class="contrib-icon">✅</div>
+        <div class="contrib-title">Tests & Linting</div>
+        <div class="contrib-text">Run <code style="font-family:DM Mono,monospace;font-size:.85em;color:var(--cyan)">npm run lint && npm run test</code> before opening a PR. All CI checks — lint, type-check, validate:openapi, and security scans — must pass.</div>
+      </div>
+      <div class="contrib-card">
+        <div class="contrib-icon">📖</div>
+        <div class="contrib-title">Document Everything</div>
+        <div class="contrib-text">New endpoints require OpenAPI 3.1 spec updates. New services require a README, architecture notes, and service registration in the gateway config.</div>
+      </div>
+      <div class="contrib-card">
+        <div class="contrib-icon">🤝</div>
+        <div class="contrib-title">Community First</div>
+        <div class="contrib-text">This platform serves the Deaf community. Contributions that improve accessibility, ASL video, captioning, or Deaf-user flows are prioritized in review.</div>
+      </div>
+      <div class="contrib-card">
+        <div class="contrib-icon">🔐</div>
+        <div class="contrib-title">Security Policy</div>
+        <div class="contrib-text">Security vulnerabilities are reported privately — never as public issues. See SECURITY.md for the responsible disclosure process and scope.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:2.5rem;" class="code-block reveal">
+      <div class="code-header">
+        <div class="code-dots">
+          <div class="code-dot cd-red"></div>
+          <div class="code-dot cd-yellow"></div>
+          <div class="code-dot cd-green"></div>
+        </div>
+        <span>Contribution Flow</span>
+      </div>
+      <div class="code-body">
+<span class="c-comment"># 1. Fork → clone → branch</span>
+<span class="c-cmd">git checkout</span> -b <span class="c-str">feat/your-feature</span>
+
+<span class="c-comment"># 2. Make changes · write tests</span>
+
+<span class="c-comment"># 3. Validate</span>
+<span class="c-cmd">npm run</span> lint <span class="c-key">&&</span> <span class="c-cmd">npm run</span> test <span class="c-key">&&</span> <span class="c-cmd">npm run</span> validate:openapi
+
+<span class="c-comment"># 4. Commit (Conventional Commits)</span>
+<span class="c-cmd">git commit</span> -m <span class="c-str">"feat: add ASL overlay to video SDK"</span>
+
+<span class="c-comment"># 5. Push → open PR</span>
+<span class="c-cmd">git push origin</span> feat/your-feature
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta-footer">
+  <h2>Ready to build <em style="background:linear-gradient(135deg,var(--pink),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal">Deaf-First</em>?</h2>
+  <p>Star the repo, read the architecture docs, and join the community building the most accessible platform on the web.</p>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+    <a href="https://github.com/pinkycollie/DEAF-FIRST-PLATFORM" class="btn btn-primary btn-lg" target="_blank">
+      ⭐ Star on GitHub
+    </a>
+    <a href="https://github.com/pinkycollie/DEAF-FIRST-PLATFORM/fork" class="btn btn-ghost btn-lg" target="_blank">
+      🍴 Fork the Repo
+    </a>
+    <a href="https://mbtq.dev" class="btn btn-ghost btn-lg" target="_blank">
+      🌐 Visit mbtq.dev
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">MBTQ<span>.</span>dev — Deaf-First Platform</div>
+  <ul class="footer-links">
+    <li><a href="https://github.com/pinkycollie/DEAF-FIRST-PLATFORM" target="_blank">GitHub</a></li>
+    <li><a href="https://github.com/pinkycollie/DEAF-FIRST-PLATFORM/blob/main/LICENSE" target="_blank">License</a></li>
+    <li><a href="https://github.com/pinkycollie/DEAF-FIRST-PLATFORM/blob/main/CONTRIBUTING.md" target="_blank">Contributing</a></li>
+    <li><a href="https://github.com/pinkycollie/DEAF-FIRST-PLATFORM/blob/main/SECURITY.md" target="_blank">Security</a></li>
+    <li><a href="https://mbtq.dev" target="_blank">mbtq.dev</a></li>
+  </ul>
+  <div class="footer-license">MIT License · Built by 360 Magicians · Deaf-First · WCAG 2.1 AAA</div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Card radial hover
+  document.querySelectorAll('.service-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top)  / rect.height) * 100;
+      card.style.setProperty('--mx', x + '%');
+      card.style.setProperty('--my', y + '%');
+    });
+  });
+</script>
+
+</body>
 </html>
