@@ -2,13 +2,13 @@ name: Deaf-First Platform CI/CD
 
 on:
   push:
-    branches: [main]
+    branches: [deno]
   pull_request:
-    branches: [main]
+    branches: [deno]
   workflow_dispatch:
 
 env:
-  DENO_VERSION: "1.45.x"
+  DENO_VERSION:latest
   SERVICES: "api auth ai sync fibonrose"
 
 jobs:
