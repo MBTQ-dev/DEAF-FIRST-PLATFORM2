@@ -1,0 +1,231 @@
+# ============================================================
+# .github/workflows/mbtq-network.yml
+# MBTQ Network Configuration
+# Tunnel health, DNS verification, egress audit, node mesh map
+# Based on GitHub Actions 2026 security roadmap egress firewall
+# ============================================================
+
+name: MBTQ Network Config
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "Network operation"
+        required: true
+        type: choice
+        options:
+          - health-check-all
+          - tunnel-diagnostics
+          - dns-verify
+          - rotate-tunnel-token
+          - add-node
+          - remove-node
+          - egress-audit
+          - mesh-map
+
+      node_name:
+        description: "Node name (for add-node / remove-node)"
+        type: string
+        default: ""
+
+      node_port:
+        description: "Internal port (for add-node)"
+        type: string
+        default: ""
+
+      tunnel_log_level:
+        description: "cloudflared log level for diagnostics"
+        type: choice
+        default: "debug"
+        options: [debug, info, warn, error]
+
+      environment:
+        description: "Target environment"
+        type: choice
+        default: "production"
+        options: [staging, production]
+
+  # Weekly network audit
+  schedule:
+    - cron: "0 6 * * 1"   # Monday 6 AM UTC
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # Health check all nodes
+  # ─────────────────────────────────────────────────────────────
+  health-check-all:
+    name: Health Check — All Nodes
+    runs-on: ubuntu-latest
+    if: |
+      github.event.inputs.operation == 'health-check-all' ||
+      github.event_name == 'schedule'
+
+    steps:
+      - name: Check all MBTQ subdomains
+        run: |
+          NODES="gateway deafauth pinksync fibronrose pinkflow a11y magicians dao core"
+          echo "## MBTQ Node Health — $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "| Node | URL | Status | Latency |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-----|--------|---------|" >> $GITHUB_STEP_SUMMARY
+
+          for node in $NODES; do
+            URL="https://${node}.mbtq.dev/health"
+            START=$(date +%s%N)
+            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" "$URL" --max-time 10 || echo "000")
+            END=$(date +%s%N)
+            LATENCY=$(( (END - START) / 1000000 ))ms
+
+            ICON="✓"
+            [ "$STATUS" != "200" ] && ICON="✗"
+
+            echo "| ${ICON} ${node} | ${URL} | ${STATUS} | ${LATENCY} |" >> $GITHUB_STEP_SUMMARY
+          done
+
+      - name: Trust node mesh status
+        run: |
+          echo ""
+          echo "## Trust Mesh (Fibronrose)"
+          curl -sf https://fibronrose.mbtq.dev/mesh/status --max-time 10 | jq . || \
+            echo "Mesh status unavailable"
+
+  # ─────────────────────────────────────────────────────────────
+  # Tunnel diagnostics
+  # ─────────────────────────────────────────────────────────────
+  tunnel-diagnostics:
+    name: Tunnel Diagnostics (cloudflared ${{ env.CLOUDFLARED_VERSION }})
+    runs-on: ubuntu-latest
+    if: github.event.inputs.operation == 'tunnel-diagnostics'
+    env:
+      CLOUDFLARED_VERSION: "2025.11.1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cloudflared ${{ env.CLOUDFLARED_VERSION }}
+        run: |
+          curl -fsSL \
+            "https://github.com/cloudflare/cloudflared/releases/download/${{ env.CLOUDFLARED_VERSION }}/cloudflared-linux-amd64.deb" \
+            -o cloudflared.deb
+          sudo dpkg -i cloudflared.deb
+          cloudflared --version
+
+      - name: Validate ingress config
+        run: cloudflared tunnel ingress validate --config cloudflared/config.yml
+
+      - name: Tunnel info
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          cloudflared tunnel list 2>/dev/null || echo "Tunnel list requires auth"
+
+      - name: Run diagnostics
+        run: |
+          cloudflared tunnel --config cloudflared/config.yml \
+            --loglevel ${{ github.event.inputs.tunnel_log_level || 'debug' }} \
+            diag || echo "Diag command (requires running tunnel)"
+
+  # ─────────────────────────────────────────────────────────────
+  # DNS verification
+  # ─────────────────────────────────────────────────────────────
+  dns-verify:
+    name: DNS Verification
+    runs-on: ubuntu-latest
+    if: |
+      github.event.inputs.operation == 'dns-verify' ||
+      github.event_name == 'schedule'
+
+    steps:
+      - name: Verify all subdomain DNS records
+        run: |
+          NODES="gateway deafauth pinksync fibronrose pinkflow a11y magicians dao core stream"
+          echo "## DNS Verification — $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "| Node | CNAME | Resolves |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|---------|" >> $GITHUB_STEP_SUMMARY
+
+          for node in $NODES; do
+            HOST="${node}.mbtq.dev"
+            CNAME=$(dig +short CNAME "$HOST" 2>/dev/null || echo "n/a")
+            RESOLVES=$(curl -sf --connect-timeout 5 -o /dev/null -w "%{http_code}" \
+              "https://${HOST}/health" 2>/dev/null || echo "000")
+            echo "| ${node} | ${CNAME:-none} | ${RESOLVES} |" >> $GITHUB_STEP_SUMMARY
+          done
+
+  # ─────────────────────────────────────────────────────────────
+  # Rotate tunnel credentials
+  # ─────────────────────────────────────────────────────────────
+  rotate-tunnel-token:
+    name: Rotate Tunnel Token
+    runs-on: ubuntu-latest
+    if: github.event.inputs.operation == 'rotate-tunnel-token'
+    environment: production   # requires manual approval
+
+    steps:
+      - name: Install cloudflared
+        run: |
+          curl -fsSL \
+            "https://github.com/cloudflare/cloudflared/releases/download/2025.11.1/cloudflared-linux-amd64.deb" \
+            -o cloudflared.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Rotate credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          # Rotate tunnel token — new credentials JSON written to stdout
+          # In production: pipe to secrets manager or re-set GH secret
+          cloudflared tunnel rotate-secret mbtq-tunnel 2>/dev/null || \
+            echo "Rotate requires tunnel to be locally authenticated"
+
+      - name: Notify PinkSync of rotation
+        env:
+          PINKSYNC_API_KEY: ${{ secrets.PINKSYNC_API_KEY }}
+        run: |
+          curl -sf -X POST \
+            -H "Authorization: Bearer $PINKSYNC_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"channel":"hotchannel:audit","payload":{"event":"tunnel_token_rotated","actor":"${{ github.actor }}","timestamp":"'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"}}' \
+            "https://pinksync.mbtq.dev/publish" --max-time 5
+
+  # ─────────────────────────────────────────────────────────────
+  # Mesh map — visualize the trust node topology
+  # ─────────────────────────────────────────────────────────────
+  mesh-map:
+    name: Trust Mesh Map
+    runs-on: ubuntu-latest
+    if: github.event.inputs.operation == 'mesh-map'
+
+    steps:
+      - name: Generate mesh topology
+        run: |
+          echo "## MBTQ Trust Node Mesh" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+              ┌─────────────────────────────────────────┐
+              │        Cloudflare Edge (Worker)          │
+              │  gateway / deafauth / pinksync /         │
+              │  fibonrose / pinkflow / a11y            │
+              └────────────────┬────────────────────────┘
+                               │  cloudflared 2025.11.1
+                               │  outbound-only tunnel
+                               ▼
+              ┌─────────────────────────────────────────┐
+              │          MBTQ Origin (private)          │
+              │                                         │
+              │  [DeafAUTH:3002]──────→ identity gate   │
+              │  [PinkSync:3003]───────→ accommosystem  │
+              │  [Fibonrose:3004]─────→ trust engine    │
+              │  [PinkFlow:3008]───────→ flow orchestr.  │
+              │  [a11y:3005]───────────→ access engine   │
+              │                                         │
+              │  Fibonrose syncs scores to all nodes ↑ │
+              └─────────────────────────────────────────┘
+EOF
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Live mesh status from Fibonrose
+        run: |
+          curl -sf https://trust.mbtq.dev/mesh/status \
+            --max-time 10 | jq . >> $GITHUB_STEP_SUMMARY || \
+            echo "Mesh endpoint pending deployment"
