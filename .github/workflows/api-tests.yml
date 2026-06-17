@@ -2,9 +2,9 @@ name: API Tests and Validation
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, copilot/**]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, copilot/**]
 
 jobs:
   test:
@@ -12,7 +12,7 @@ jobs:
     
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [25.x]
     
     steps:
     - uses: actions/checkout@v3
